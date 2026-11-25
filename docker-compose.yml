@@ -1,0 +1,57 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: sh-hospital-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-ChangeMe_RootPass_2026!}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-sh_hospital_opd}
+      MYSQL_USER: ${MYSQL_USER:-hospital_app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-ChangeMe_AppPass_2026!}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-ChangeMe_RootPass_2026!}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sh-hospital-api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=${MYSQL_DATABASE:-sh_hospital_opd};User=${MYSQL_USER:-hospital_app};Password=${MYSQL_PASSWORD:-ChangeMe_AppPass_2026!};AllowPublicKeyRetrieval=True;
+      Jwt__Issuer: ${Jwt__Issuer:-SHHospitalOPD.API}
+      Jwt__Audience: ${Jwt__Audience:-SHHospitalOPD.Client}
+      Jwt__SecretKey: ${Jwt__SecretKey:-SH_Hospital_OPD_Super_Secret_Signing_Key_2026_Change_In_Prod!}
+      Jwt__AccessTokenMinutes: ${Jwt__AccessTokenMinutes:-15}
+      Jwt__RefreshTokenDays: ${Jwt__RefreshTokenDays:-7}
+      Cors__AllowedOrigins__0: http://localhost:4200
+      Seed__EnableDemoData: ${Seed__EnableDemoData:-true}
+    ports:
+      - "5001:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sh-hospital-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "4200:80"
+
+volumes:
+  mysql_data:

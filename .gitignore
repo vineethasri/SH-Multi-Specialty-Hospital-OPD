@@ -1,0 +1,31 @@
+# Secrets & Environment
+.env
+.env.local
+.env.*.local
+*.pfx
+*.key
+
+# .NET Build Outputs
+backend/**/bin/
+backend/**/obj/
+backend/.vs/
+*.user
+*.suo
+TestResults/
+
+# Angular / Node
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/out-tsc/
+npm-debug.log*
+
+# Database Backups & Logs
+database/backups/
+*.log
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

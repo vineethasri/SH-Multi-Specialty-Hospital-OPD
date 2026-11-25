@@ -1,0 +1,201 @@
+{
+  "info": {
+    "name": "SH Hospital OPD Management API v1",
+    "_postman_id": "8a4d2c10-9a1e-4b33-9f22-112233445566",
+    "description": "Complete API collection for SH Multi-Specialty Hospital OPD Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5001/api/v1" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{accessToken}}", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (Admin / Staff / Patient)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) pm.collectionVariables.set('accessToken', res.accessToken);",
+                  "if (res.refreshToken) pm.collectionVariables.set('refreshToken', res.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@shhospital.in\",\n  \"password\": \"Admin@123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register Patient",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Neha\",\n  \"lastName\": \"Verma\",\n  \"email\": \"neha.verma@example.in\",\n  \"phoneNumber\": \"+91 98450 55112\",\n  \"password\": \"Patient@2026\",\n  \"dateOfBirth\": \"1994-05-12\",\n  \"gender\": \"Female\",\n  \"bloodGroup\": \"B+\",\n  \"city\": \"Bengaluru\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/refresh",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": { "method": "GET", "url": "{{baseUrl}}/auth/me" }
+        }
+      ]
+    },
+    {
+      "name": "Public Directory & Schedules",
+      "item": [
+        { "name": "List Departments", "request": { "method": "GET", "url": "{{baseUrl}}/departments?isActive=true" } },
+        { "name": "Hospital Settings", "request": { "method": "GET", "url": "{{baseUrl}}/departments/hospital-settings" } },
+        { "name": "List Doctors", "request": { "method": "GET", "url": "{{baseUrl}}/doctors?isActive=true&page=1&pageSize=20" } },
+        { "name": "Doctor Available Slots", "request": { "method": "GET", "url": "{{baseUrl}}/doctors/1/slots?date=2026-11-26" } },
+        { "name": "List Schedules", "request": { "method": "GET", "url": "{{baseUrl}}/schedules?doctorId=1" } }
+      ]
+    },
+    {
+      "name": "Patients & Appointments",
+      "item": [
+        { "name": "Search Patients", "request": { "method": "GET", "url": "{{baseUrl}}/patients?page=1&pageSize=15&search=" } },
+        {
+          "name": "Register Walk-in Patient",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/patients",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Ravi\",\n  \"lastName\": \"Prakash\",\n  \"dateOfBirth\": \"1988-08-20\",\n  \"gender\": \"Male\",\n  \"bloodGroup\": \"O+\",\n  \"phoneNumber\": \"+91 98450 88776\",\n  \"city\": \"Bengaluru\"\n}"
+            }
+          }
+        },
+        { "name": "List Appointments", "request": { "method": "GET", "url": "{{baseUrl}}/appointments?page=1&pageSize=15" } },
+        {
+          "name": "Book Appointment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/appointments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"doctorId\": 1,\n  \"departmentId\": 1,\n  \"appointmentDate\": \"2026-11-26\",\n  \"startTime\": \"10:00:00\",\n  \"reasonForVisit\": \"General health consultation\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "OPD Queue, Consultations & Prescriptions",
+      "item": [
+        { "name": "Get Doctor Waiting Queue", "request": { "method": "GET", "url": "{{baseUrl}}/visits/queue" } },
+        {
+          "name": "Check-In Appointment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/visits/check-in",
+            "body": { "mode": "raw", "raw": "{\n  \"appointmentId\": 2,\n  \"chiefComplaint\": \"Fever for 3 days\"\n}" }
+          }
+        },
+        {
+          "name": "Walk-In Check-In",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/visits/walk-in",
+            "body": { "mode": "raw", "raw": "{\n  \"patientId\": 4,\n  \"doctorId\": 1,\n  \"departmentId\": 1,\n  \"chiefComplaint\": \"Acute headache\"\n}" }
+          }
+        },
+        {
+          "name": "Start Consultation",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/consultations/start",
+            "body": { "mode": "raw", "raw": "{\n  \"visitId\": 2\n}" }
+          }
+        },
+        {
+          "name": "Save Prescription",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/prescriptions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultationId\": 1,\n  \"generalInstructions\": \"Drink plenty of fluids\",\n  \"items\": [\n    {\n      \"medicineName\": \"Paracetamol\",\n      \"dosage\": \"650 mg\",\n      \"frequency\": \"1-1-1\",\n      \"durationDays\": 3,\n      \"route\": \"Oral\",\n      \"timingInstruction\": \"After food\",\n      \"quantity\": 9\n    }\n  ]\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Billing, Payments, Checkout & Analytics",
+      "item": [
+        {
+          "name": "Generate Bill",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/bills",
+            "body": { "mode": "raw", "raw": "{\n  \"visitId\": 2,\n  \"discountAmount\": 0,\n  \"notes\": \"Standard OPD consultation\"\n}" }
+          }
+        },
+        {
+          "name": "Record Payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/payments",
+            "body": { "mode": "raw", "raw": "{\n  \"billId\": 2,\n  \"amount\": 900,\n  \"method\": \"UPI\",\n  \"transactionReference\": \"UPI-12345678\"\n}" }
+          }
+        },
+        {
+          "name": "Checkout Visit",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/visits/2/checkout",
+            "body": { "mode": "raw", "raw": "{\n  \"notes\": \"Checked out cleanly\"\n}" }
+          }
+        },
+        { "name": "Dashboard Analytics", "request": { "method": "GET", "url": "{{baseUrl}}/dashboard" } },
+        { "name": "Billing Report", "request": { "method": "GET", "url": "{{baseUrl}}/reports/billing" } },
+        { "name": "Audit Logs", "request": { "method": "GET", "url": "{{baseUrl}}/reports/audit-logs?page=1&pageSize=20" } },
+        { "name": "My Notifications", "request": { "method": "GET", "url": "{{baseUrl}}/notifications?page=1&pageSize=20" } }
+      ]
+    }
+  ]
+}
